@@ -1,0 +1,2 @@
+# https://github.com/brendangregg/FlameGraph - This needs to be on your path.
+pip install git+https://github.com/evanhempel/python-flamegraph.git

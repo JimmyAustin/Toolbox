@@ -1,1 +1,1 @@
-from permutate_img import permutate_img
+from .permutate_img import permutate_img

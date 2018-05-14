@@ -2,7 +2,12 @@ from datetime import datetime
 import os
 import shutil
 from scipy.misc import imsave
-import cv2
+try:
+    import cv2
+    cv2_enabled = True
+except ImportError:
+    cv2_enabled = False
+    pass
 import scipy
 import numpy as np
 
@@ -14,7 +19,7 @@ class Blackbox:
         return Blackbox(*args, **kwargs)
 
     def __init__(self, image_size=(480, 640), feeds=[], folder=None):
-        self.disabled = disabled
+        print('blackbox start')
         self.image_size = image_size
         self.feeds=feeds
         self.folder=folder or './last_run'#'./' + datetime.now().isoformat()
@@ -25,8 +30,6 @@ class Blackbox:
         self.debug_information = {}
 
     def add_image(self, feed, image, debug_information={}):
-        if self.disabled: 
-            return 
         self.current_images[feed] = self.ready_image(image, title=feed)
         self.debug_information.update(debug_information)
         #self.save_image()
@@ -39,8 +42,6 @@ class Blackbox:
 
     def build_image(self):
         images = [self.current_images[x] for x in self.feeds]
-        print(images)
-        print([image.shape for image in images])
 
         image = np.concatenate(tuple(images), axis=1)
         add_text(image, str(self.debug_information), (2,self.image_size[0]-2))
@@ -55,8 +56,6 @@ class Blackbox:
         if len(image.shape) == 2 or len(image.shape) == 3 and image.shape[-1] == 1:
             image = np.resize(image, (image.shape[0], image.shape[1], 1))
             image = np.concatenate((image, image, image), axis=2)
-            print("image shape")
-            print(image.shape)
         image = scipy.misc.imresize(image, self.image_size)
         add_text(image, title, (10, 10))
         return image
@@ -66,6 +65,8 @@ class Blackbox:
         pass
 
 def add_text(image, text, bottom_left_corner_of_text):
+    if cv2_enabled is False:
+        return
     font                   = cv2.FONT_HERSHEY_SIMPLEX
     fontScale              = 0.75
     fontColor              = (255,255,255)
